@@ -1,6 +1,8 @@
 package com.rustfisher.appaudio.fragment;
 
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -82,7 +84,8 @@ public class PlayOnlineAudioFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setOnClick(onClickListener, view, R.id.play, R.id.pause, R.id.stop);
+        setOnClick(onClickListener, view, R.id.play, R.id.pause, R.id.stop,
+                R.id.speed_m1, R.id.speed_0, R.id.speed_0p5, R.id.speed_1p, R.id.speed_1p5, R.id.speed_2p);
     }
 
     @Override
@@ -115,6 +118,25 @@ public class PlayOnlineAudioFragment extends BaseFragment {
                     mediaPlayer.stop();
                     prepared = false;
                     mediaPlayer.prepareAsync();
+                    break;
+                case R.id.speed_m1:
+                    boolean r1 = setPlaySpeed(-1); // 会抛异常 IllegalArgumentException
+                    Log.d(TAG, "onClick: 设置播放速度结果 " + r1);
+                    break;
+                case R.id.speed_0:
+                    setPlaySpeed(0);
+                    break;
+                case R.id.speed_0p5:
+                    setPlaySpeed(0.5f);
+                    break;
+                case R.id.speed_1p:
+                    setPlaySpeed(1f);
+                    break;
+                case R.id.speed_1p5:
+                    setPlaySpeed(1.5f);
+                    break;
+                case R.id.speed_2p:
+                    setPlaySpeed(2f);
                     break;
             }
         }
@@ -204,5 +226,20 @@ public class PlayOnlineAudioFragment extends BaseFragment {
         for (int id : resIDs) {
             root.findViewById(id).setOnClickListener(onClickListener);
         }
+    }
+
+    private boolean setPlaySpeed(float speed) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                PlaybackParams params = mediaPlayer.getPlaybackParams();
+                params.setSpeed(speed);
+                mediaPlayer.setPlaybackParams(params);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "setPlaySpeed: ", e);
+                return false;
+            }
+        }
+        return false;
     }
 }
